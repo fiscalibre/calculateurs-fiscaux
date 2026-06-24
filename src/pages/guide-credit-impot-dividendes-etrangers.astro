@@ -1,0 +1,314 @@
+---
+import Disclaimer from "../components/content/Disclaimer.astro";
+
+const title =
+  "Crédit d'impôt sur dividendes étrangers : guide des cases 2047, 8VL et 8PL (2026)";
+const description =
+  "Comment fonctionne le crédit d'impôt sur les dividendes et intérêts étrangers ? Explication simple des cases 203 à 207 du formulaire 2047, de la case 8VL et de la nouvelle case 8PL 2026, sans jargon.";
+const canonical = "https://example.com/guide-credit-impot-dividendes-etrangers";
+const ogImage = "/og-default.png";
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="fr_FR" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+  </head>
+  <body>
+    <main class="page">
+      <article>
+        <header>
+          <h1>
+            Le crédit d'impôt sur dividendes étrangers, expliqué simplement
+          </h1>
+          <p class="lede">
+            Si vous touchez des dividendes ou des intérêts de l'étranger via un
+            courtier, une partie de l'impôt déjà prélevé à la source peut vous
+            être rendue en France sous forme de <strong
+              >crédit d'impôt</strong
+            >. Encore faut-il remplir les bonnes cases du formulaire
+            <strong>2047</strong>, puis reporter sur la <strong>2042</strong>.
+            Ce guide explique le mécanisme, case par case, sans jargon.
+          </p>
+        </header>
+
+        <Disclaimer />
+
+        <section aria-labelledby="principe">
+          <h2 id="principe">Pourquoi un crédit d'impôt ?</h2>
+          <p>
+            Quand une société étrangère vous verse un dividende, le pays
+            d'origine prélève souvent un impôt « à la source » (par exemple
+            15&nbsp;% aux États-Unis avec un formulaire W-8BEN valide). Sans
+            mécanisme correcteur, vous seriez imposé <em>deux fois</em>&nbsp;: une
+            fois à l'étranger, une fois en France. Les conventions fiscales
+            évitent cette double imposition en vous accordant un
+            <strong>crédit d'impôt</strong> en France, généralement égal à la
+            retenue étrangère, mais <strong>plafonné</strong>.
+          </p>
+          <p>
+            Ce crédit n'est pas automatique&nbsp;: vous devez le déclarer
+            vous-même sur le formulaire <strong>2047</strong> (« Revenus
+            encaissés à l'étranger »), puis le reporter sur votre déclaration
+            principale <strong>2042</strong>.
+          </p>
+        </section>
+
+        <section aria-labelledby="cases-2047">
+          <h2 id="cases-2047">Les cases du 2047, ligne par ligne (203 à 207)</h2>
+          <p>
+            Le cadre des revenus de valeurs mobilières du 2047 se remplit dans
+            cet ordre pour chaque ligne de revenu&nbsp;:
+          </p>
+          <dl class="cases">
+            <dt>Ligne 203 — Montant net encaissé</dt>
+            <dd>
+              Le montant <strong>net</strong> que vous avez réellement perçu, en
+              euros, après la retenue à la source étrangère. (Convertissez au
+              cours de change du jour d'encaissement.)
+            </dd>
+
+            <dt>Ligne 204 — Taux applicable</dt>
+            <dd>
+              Le taux forfaitaire indiqué dans la
+              <strong>notice 2047</strong> pour le pays concerné. Exemple
+              courant&nbsp;: une convention prévoyant 15&nbsp;% de retenue
+              correspond à un forfait « sur le net » d'environ 17,6&nbsp;%
+              (15&nbsp;/&nbsp;85).
+            </dd>
+
+            <dt>Ligne 205 — Résultat (crédit théorique)</dt>
+            <dd>
+              Le calcul <code>ligne 203 × ligne 204</code>. C'est le crédit
+              auquel la <em>convention</em> vous donne droit.
+            </dd>
+
+            <dt>Ligne 206 — Impôt réellement payé à l'étranger</dt>
+            <dd>
+              La retenue à la source effectivement prélevée, convertie en euros.
+            </dd>
+
+            <dt>Ligne 207 — Crédit d'impôt retenu</dt>
+            <dd>
+              Le plus petit des deux&nbsp;: <code
+                >min(ligne&nbsp;205, ligne&nbsp;206)</code
+              >. Si l'étranger a prélevé plus que ce que la convention prévoit,
+              l'excédent <strong>n'est pas récupérable</strong> en France (cas
+              fréquent avec l'Allemagne ou la Suisse&nbsp;: il faut alors
+              demander le remboursement au pays source).
+            </dd>
+          </dl>
+          <p>
+            Les <strong>intérêts</strong> étrangers suivent exactement la même
+            logique, sur les lignes <strong>233 à 237</strong> du même cadre.
+          </p>
+        </section>
+
+        <section aria-labelledby="case-8vl">
+          <h2 id="case-8vl">La case 8VL : le total des crédits d'impôt</h2>
+          <p>
+            Une fois la ligne 207 calculée pour chaque revenu, vous
+            <strong>additionnez tous les crédits retenus</strong> et reportez ce
+            total dans la case <strong>8VL</strong> de la 2042&nbsp;C («&nbsp;Crédit
+            d'impôt égal au prélèvement forfaitaire déjà versé&nbsp;»). C'est
+            cette case qui réduit concrètement votre impôt français.
+          </p>
+          <p class="note">
+            À noter&nbsp;: si vous optez pour le <strong>barème progressif</strong>
+            (case 2OP) plutôt que pour le prélèvement forfaitaire unique, le
+            crédit peut transiter par une autre case (2AB). Le présent guide
+            décrit le parcours par défaut (flat tax).
+          </p>
+        </section>
+
+        <section aria-labelledby="case-8pl">
+          <h2 id="case-8pl">
+            La case 8PL (2026) : la nouveauté qui sème la confusion
+          </h2>
+          <p>
+            La case <strong>8PL</strong> est apparue sur le 2047 pour la
+            déclaration <strong>2026</strong> (revenus 2025). Son libellé
+            officiel&nbsp;: «&nbsp;<em
+              >Montant des plus-values et revenus de capitaux mobiliers nets
+              ouvrant droit à crédit d'impôt étranger</em
+            >&nbsp;».
+          </p>
+          <p>
+            Concrètement, vous y inscrivez le <strong>montant des revenus</strong>
+            (la <em>base</em>) qui ouvrent droit au crédit déclaré en 8VL — et
+            non le crédit lui-même. Cette base sert à l'administration à
+            <strong>plafonner</strong> le crédit à l'impôt français
+            théoriquement dû sur ces mêmes revenus.
+          </p>
+          <h3 id="erreur-8pl">L'erreur n°1 de 2026 : « ligne 8VL sans code 8PL »</h3>
+          <p>
+            Beaucoup de contribuables remplissent 8VL (le crédit) mais oublient
+            8PL (la base). Le contrôle de cohérence d'impots.gouv.fr affiche
+            alors le message <strong>« ligne 8VL sans code 8PL »</strong>. La
+            règle est simple&nbsp;: <strong
+              >si vous remplissez 8VL, vous devez aussi remplir 8PL</strong
+            >.
+          </p>
+          <p class="note">
+            Point d'attention honnête&nbsp;: la <strong>nature exacte</strong> du
+            montant à porter en 8PL (net après retenue, brut avant retenue, ou
+            net après abattement de 40&nbsp;% en cas de barème) prête encore à
+            confusion en 2026, et la DGFiP ne l'a pas pleinement documentée.
+            Reportez-vous à la
+            <a
+              href="https://www.impots.gouv.fr/sites/default/files/formulaires/2047/2026/2047_5490.pdf"
+              rel="noopener"
+              target="_blank">notice officielle 2047</a
+            > et, en cas de doute, à un professionnel.
+          </p>
+        </section>
+
+        <section aria-labelledby="routage-2042">
+          <h2 id="routage-2042">Où va le revenu lui-même sur la 2042 ?</h2>
+          <p>
+            Le crédit d'impôt (8VL/8PL) ne dispense pas de déclarer le
+            <strong>revenu</strong>. Selon sa nature&nbsp;:
+          </p>
+          <ul>
+            <li>
+              <strong>Dividendes</strong> encaissés via un courtier étranger
+              sans prélèvement français&nbsp;: en principe case
+              <strong>2TS</strong> (autres revenus distribués / revenus à
+              déclarer), la case <strong>2DC</strong> visant les dividendes
+              ouvrant droit à l'abattement de 40&nbsp;% (option barème). Le bon
+              routage dépend de votre situation.
+            </li>
+            <li>
+              <strong>ETF capitalisants irlandais ou luxembourgeois</strong>&nbsp;:
+              attention, ce ne sont pas des dividendes — leurs distributions ou
+              revenus suivent leurs propres règles.
+            </li>
+          </ul>
+          <p class="note">
+            Le routage 2042 dépend de détails (type d'instrument, option
+            d'imposition, retenues déjà opérées). Vérifiez systématiquement avec
+            la notice.
+          </p>
+        </section>
+
+        <section aria-labelledby="exemple">
+          <h2 id="exemple">Un exemple chiffré (dividende US)</h2>
+          <p>
+            Vous percevez 1&nbsp;000&nbsp;€ de dividendes américains nets après
+            une retenue de 15&nbsp;% (soit ~176&nbsp;€ retenus sur un brut de
+            ~1&nbsp;176&nbsp;€)&nbsp;:
+          </p>
+          <ul>
+            <li>Ligne 203 = 1&nbsp;000&nbsp;€ (net encaissé)</li>
+            <li>Ligne 204 = 17,6&nbsp;% (forfait notice sur le net)</li>
+            <li>Ligne 205 = 1&nbsp;000 × 17,6&nbsp;% = 176&nbsp;€</li>
+            <li>Ligne 206 = 176&nbsp;€ (impôt étranger réel)</li>
+            <li>Ligne 207 = min(176, 176) = <strong>176&nbsp;€</strong></li>
+          </ul>
+          <p>
+            Vous reportez <strong>176&nbsp;€ en 8VL</strong> (le crédit) et la
+            base nette correspondante en <strong>8PL</strong>.
+          </p>
+        </section>
+
+        <section aria-labelledby="outil">
+          <h2 id="outil">Calculer automatiquement vos cases</h2>
+          <p>
+            Notre <a href="/">calculateur gratuit</a> fait ces calculs pour
+            vous, ligne par ligne, à partir de votre saisie manuelle (pays,
+            montant, devise, date, retenue), avec conversion au cours du jour. Il
+            est <strong>100&nbsp;% côté navigateur</strong> et open source —
+            aucune donnée n'est envoyée.
+          </p>
+        </section>
+
+        <Disclaimer />
+
+        <footer class="page-footer">
+          <p>
+            <a href="/case-8pl-8vl-2026">Tout comprendre sur 8PL vs 8VL en 2026 →</a>
+          </p>
+        </footer>
+      </article>
+    </main>
+
+    <style>
+      .page {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: #1a1a1a;
+        line-height: 1.65;
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        margin-top: 2.5rem;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin-top: 1.5rem;
+      }
+      .lede {
+        font-size: 1.1rem;
+        color: #333;
+      }
+      .cases dt {
+        font-weight: 600;
+        margin-top: 1rem;
+      }
+      .cases dd {
+        margin: 0.25rem 0 0;
+      }
+      code {
+        background: #f0f0f0;
+        padding: 0.1em 0.35em;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+      .note {
+        font-size: 0.92rem;
+        color: #555;
+        background: #f6f6f4;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+      }
+      a {
+        color: #1d4ed8;
+      }
+      .page-footer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e2e2;
+      }
+    </style>
+  </body>
+</html>

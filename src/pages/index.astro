@@ -1,0 +1,65 @@
+---
+import "../styles/global.css";
+import Calculateur from "../components/Calculateur.tsx";
+import Disclaimer from "../components/content/Disclaimer.astro";
+
+const title =
+  "Calculateur gratuit du crédit d'impôt sur dividendes étrangers (2047, 8VL, 8PL)";
+const description =
+  "Calculez gratuitement votre crédit d'impôt sur dividendes et intérêts étrangers : cases 2047 (205/207), 8VL et 8PL 2026. Calcul 100 % local dans votre navigateur, open source, sans compte ni tracker.";
+const canonical = "https://example.com/";
+const ogImage = "/og-default.png";
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="fr_FR" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <main>
+      <!-- Calculateur : îlot React hydraté côté client -->
+      <Calculateur client:load />
+
+      <!-- Contenu / SEO : maillage interne vers les guides -->
+      <section class="mx-auto w-full max-w-4xl px-4 pb-10">
+        <Disclaimer />
+
+        <nav class="mt-6 text-sm" aria-label="Guides">
+          <h2 class="mb-2 text-base font-semibold text-slate-900">Pour aller plus loin</h2>
+          <ul class="list-inside list-disc text-blue-700">
+            <li>
+              <a class="underline" href="/guide-credit-impot-dividendes-etrangers"
+                >Guide complet : crédit d'impôt, cases 2047, 8VL et 8PL</a
+              >
+            </li>
+            <li>
+              <a class="underline" href="/case-8pl-8vl-2026"
+                >Cases 8PL / 8VL 2026 et l'erreur « ligne 8VL sans code 8PL »</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </section>
+    </main>
+  </body>
+</html>

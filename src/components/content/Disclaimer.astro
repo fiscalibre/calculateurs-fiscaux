@@ -1,0 +1,62 @@
+---
+/**
+ * Disclaimer.astro — encart réutilisable pour les pages de contenu.
+ *
+ * Composant statique, zéro JS. Affiche :
+ *   1. l'avertissement « aide informative, pas un conseil fiscal » ;
+ *   2. l'encart open source AGPLv3 invitant à vérifier le code public.
+ *
+ * Props :
+ *   - repoUrl  : URL du dépôt public (placeholder par défaut, à remplacer).
+ *   - noticeUrl: lien vers la notice officielle 2047.
+ */
+interface Props {
+  repoUrl?: string;
+  noticeUrl?: string;
+}
+
+const {
+  repoUrl = "https://github.com/fiscalibre/calculateurs-fiscaux",
+  noticeUrl = "https://www.impots.gouv.fr/sites/default/files/formulaires/2047/2026/2047_5490.pdf",
+} = Astro.props;
+---
+
+<aside class="disclaimer" aria-label="Avertissement et licence">
+  <p class="disclaimer__warn">
+    <strong>Aide informative, pas un conseil fiscal</strong> — vérifiez chaque
+    montant avec la <a href={noticeUrl} rel="noopener" target="_blank"
+      >notice officielle du formulaire 2047</a
+    > ou un professionnel. Cet outil ne se substitue pas à la déclaration officielle.
+  </p>
+  <p class="disclaimer__oss">
+    <strong>Open source (AGPLv3)</strong> — le code de calcul est public&nbsp;:
+    vous pouvez vérifier les cases, les taux et la logique, et signaler une
+    erreur. <a href={repoUrl} rel="noopener" target="_blank">Voir le code</a>.
+    Aucune donnée fiscale ne quitte votre navigateur ; zéro compte, zéro
+    tracker.
+  </p>
+</aside>
+
+<style>
+  .disclaimer {
+    margin: 2rem 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid #d8d8d8;
+    border-left: 4px solid #b45309;
+    border-radius: 6px;
+    background: #fbfaf7;
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .disclaimer p {
+    margin: 0;
+  }
+  .disclaimer__oss {
+    margin-top: 0.75rem !important;
+    color: #444;
+  }
+  .disclaimer a {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
+</style>
