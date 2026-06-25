@@ -1,7 +1,7 @@
 import { PAYS_2025 } from "../lib/tax-engine";
 import type { LigneSaisie, ModeMontant } from "./types";
 import type { TypeRevenu } from "../lib/tax-engine";
-import { devisErangere } from "./fx";
+import { DEVISE_DEFAUT, DEVISES_SUPPORTEES, devisErangere } from "./fx";
 
 /**
  * Une ligne éditable du formulaire de saisie.
@@ -27,7 +27,7 @@ export default function LigneFormulaire({
   onSupprimer,
 }: LigneFormulaireProps) {
   const montantNegatif = ligne.montant.trim() !== "" && Number(ligne.montant.replace(/\s/g, "").replace(",", ".")) < 0;
-  const afficheBadgeBce = devisErangere(ligne.devise);
+  const afficheInfoBce = devisErangere(ligne.devise);
 
   return (
     <fieldset className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
@@ -121,17 +121,22 @@ export default function LigneFormulaire({
         {/* Devise */}
         <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
           Devise
-          <input
-            type="text"
-            maxLength={3}
-            className={classeChamp + " uppercase"}
+          <select
+            className={classeChamp}
             autoComplete="off"
             value={ligne.devise}
-            onChange={(e) => onChange(ligne.id, { devise: e.target.value.toUpperCase() })}
-          />
-          {afficheBadgeBce && (
+            onChange={(e) => onChange(ligne.id, { devise: e.target.value })}
+          >
+            <option value={DEVISE_DEFAUT}>{DEVISE_DEFAUT}</option>
+            {DEVISES_SUPPORTEES.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+          {afficheInfoBce && (
             <span className="mt-0.5 inline-flex w-fit items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-              conversion BCE à venir
+              converti en EUR au cours BCE du jour d'encaissement
             </span>
           )}
         </label>
@@ -151,6 +156,20 @@ export default function LigneFormulaire({
             onChange={(e) => onChange(ligne.id, { impotEtranger: e.target.value })}
           />
         </label>
+
+        {/* Abattement 40 % : routage 2DC (coché) vs 2TS — dividendes uniquement. */}
+        {ligne.type === "dividende" && (
+          <label className="flex items-start gap-2 text-sm font-medium text-slate-700 sm:col-span-2 lg:col-span-3">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-1 focus:ring-blue-500"
+              autoComplete="off"
+              checked={ligne.eligibleAbattement40 ?? true}
+              onChange={(e) => onChange(ligne.id, { eligibleAbattement40: e.target.checked })}
+            />
+            Éligible à l'abattement de 40 % (UE/convention)
+          </label>
+        )}
       </div>
 
       <div className="mt-3 flex items-center justify-between">

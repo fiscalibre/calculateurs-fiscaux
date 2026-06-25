@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { calculeDeclaration, PAYS_2025 } from "../lib/tax-engine";
 import type { Ligne, Pays } from "../lib/tax-engine";
 import type { LigneSaisie } from "./types";
-import { DEVISE_DEFAUT, toCents } from "./fx";
+import { DEVISE_DEFAUT, convertitVersEur } from "./fx";
 import LigneFormulaire from "./LigneFormulaire";
 import Resultats from "./Resultats";
 
@@ -35,6 +35,7 @@ function ligneVide(): LigneSaisie {
     devise: DEVISE_DEFAUT,
     dateEncaissement: "",
     impotEtranger: "",
+    eligibleAbattement40: true,
   };
 }
 
@@ -48,9 +49,10 @@ interface ConversionLigne {
 
 /**
  * Convertit une ligne saisie en `Ligne` du moteur.
- * - montants traités comme EUR (conversion BCE à brancher plus tard via toCents) ;
- * - si mode « brut » : net = brut − impôt étranger (le moteur attend le net) ;
- * - validation : nombres ≥ 0, net non négatif.
+ * - montant ET impôt étranger sont convertis en EUR au cours BCE du jour
+ *   d'encaissement (la retenue étrangère est libellée dans la devise source) ;
+ * - si mode « brut » : net = brut − impôt étranger, APRÈS conversion en centimes EUR ;
+ * - validation : nombres ≥ 0, conversion possible, net non négatif.
  */
 function convertitLigne(saisie: LigneSaisie): ConversionLigne {
   const erreurs: string[] = [];
@@ -61,21 +63,33 @@ function convertitLigne(saisie: LigneSaisie): ConversionLigne {
     erreurs.push("Pays inconnu.");
   }
 
-  const montantCents = toCents(saisie.montant);
-  if (montantCents === null) {
-    erreurs.push("Montant invalide (nombre ≥ 0 attendu).");
+  // Montant : converti dans la devise/date saisies.
+  const montant = convertitVersEur(saisie.montant, saisie.devise, saisie.dateEncaissement);
+  let montantCents: number | null = null;
+  if ("cents" in montant) {
+    montantCents = montant.cents;
+  } else {
+    erreurs.push(montant.erreur);
   }
 
-  const impotCents = saisie.impotEtranger.trim() === "" ? 0 : toCents(saisie.impotEtranger);
-  if (impotCents === null) {
-    erreurs.push("Impôt étranger invalide (nombre ≥ 0 attendu).");
+  // Impôt étranger : libellé dans la même devise, donc converti à la même date.
+  // Vide → 0 EUR, pas de conversion ni d'exigence de date.
+  let impotCents: number | null = 0;
+  if (saisie.impotEtranger.trim() !== "") {
+    const impot = convertitVersEur(saisie.impotEtranger, saisie.devise, saisie.dateEncaissement);
+    if ("cents" in impot) {
+      impotCents = impot.cents;
+    } else {
+      impotCents = null;
+      erreurs.push(`Impôt étranger : ${impot.erreur}`);
+    }
   }
 
   if (pays === undefined || montantCents === null || impotCents === null) {
     return { ligne: null, erreurs, libelle };
   }
 
-  // Brut → net : le moteur attend le net encaissé.
+  // Brut → net : le moteur attend le net encaissé (en centimes EUR).
   const netEncaisseCents = saisie.mode === "brut" ? montantCents - impotCents : montantCents;
   if (netEncaisseCents < 0) {
     erreurs.push("Le net (brut − impôt étranger) est négatif : vérifiez les montants.");
@@ -83,7 +97,14 @@ function convertitLigne(saisie: LigneSaisie): ConversionLigne {
   }
 
   return {
-    ligne: { pays, type: saisie.type, netEncaisseCents, impotEtrangerCents: impotCents },
+    ligne: {
+      pays,
+      type: saisie.type,
+      netEncaisseCents,
+      impotEtrangerCents: impotCents,
+      // Pertinent uniquement pour les dividendes ; défaut éligible (→ 2DC).
+      eligibleAbattement40: saisie.eligibleAbattement40 ?? true,
+    },
     erreurs,
     libelle,
   };

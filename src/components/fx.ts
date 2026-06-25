@@ -5,11 +5,26 @@
  * On convertit la saisie utilisateur (chaîne en euros) en **centimes entiers**
  * le plus tôt possible via `toCents`.
  *
- * Pour l'instant la conversion de devise est l'identité (on traite tout comme EUR).
- * Le module fx/BCE sera branché plus tard derrière `toCents` sans toucher à l'UI.
+ * La conversion de devise est déléguée au moteur fx/BCE (`convertirEnEuros`) :
+ * `toCents` parse la saisie en centimes de la devise source, puis `convertitVersEur`
+ * applique le cours BCE du jour d'encaissement.
  */
 
+import {
+  convertirEnEuros,
+  DEVISES_SUPPORTEES,
+  DeviseInconnueError,
+  DateInvalideError,
+  DateHorsHistoriqueError,
+} from "../lib/tax-engine/fx";
+
 export const DEVISE_DEFAUT = "EUR";
+
+/** Réexport pour l'UI : EUR + devises couvertes par l'historique BCE embarqué. */
+export { DEVISES_SUPPORTEES };
+
+/** Résultat de conversion : soit des centimes EUR, soit un message d'erreur FR. */
+export type ConversionEur = { readonly cents: number } | { readonly erreur: string };
 
 /**
  * Convertit une saisie utilisateur en euros (chaîne, ex. "1 234,56" ou "1234.56")
@@ -33,6 +48,51 @@ export function toCents(saisieEuros: string): number | null {
 /** Vrai si la devise saisie nécessitera une conversion BCE (≠ EUR). */
 export function devisErangere(devise: string): boolean {
   return devise.trim().toUpperCase() !== DEVISE_DEFAUT;
+}
+
+/**
+ * Convertit une saisie utilisateur (chaîne) exprimée dans `devise` vers des
+ * centimes d'EUR, au cours BCE du jour d'encaissement `dateISO`.
+ *
+ * - parse en centimes de la devise source via `toCents` (même normalisation) ;
+ * - si EUR : centimes inchangés, la date n'est pas requise ;
+ * - sinon : la date est obligatoire, puis on délègue à `convertirEnEuros` et on
+ *   mappe les erreurs du moteur en messages FR lisibles (déjà en FR dans `.message`).
+ *
+ * Renvoie `{ cents }` en cas de succès, sinon `{ erreur }`.
+ */
+export function convertitVersEur(
+  saisieMontant: string,
+  devise: string,
+  dateISO: string,
+): ConversionEur {
+  const centsDevise = toCents(saisieMontant);
+  if (centsDevise === null) {
+    return { erreur: "Montant invalide (nombre ≥ 0 attendu)." };
+  }
+
+  const dev = devise.trim().toUpperCase();
+  if (dev === DEVISE_DEFAUT) {
+    return { cents: centsDevise };
+  }
+
+  if (dateISO.trim() === "") {
+    return { erreur: `Date d'encaissement requise pour convertir depuis ${dev}.` };
+  }
+
+  try {
+    return { cents: convertirEnEuros(centsDevise, dev, dateISO) };
+  } catch (e) {
+    if (
+      e instanceof DeviseInconnueError ||
+      e instanceof DateInvalideError ||
+      e instanceof DateHorsHistoriqueError
+    ) {
+      return { erreur: e.message };
+    }
+    // Garde-fou : toute autre erreur (ex. TypeError) reste lisible côté UI.
+    return { erreur: e instanceof Error ? e.message : "Conversion impossible." };
+  }
 }
 
 const formatteurEuros = new Intl.NumberFormat("fr-FR", {

@@ -21,6 +21,11 @@ export interface LigneSaisie {
   devise: string;
   /** Date d'encaissement (format ISO yyyy-mm-dd issu d'un <input type="date">). */
   dateEncaissement: string;
-  /** Impôt étranger réellement retenu, en euros, sous forme de chaîne. */
+  /** Impôt étranger réellement retenu, dans la devise saisie, sous forme de chaîne. */
   impotEtranger: string;
+  /**
+   * Dividende éligible à l'abattement de 40 % (UE/convention) → routage 2DC ;
+   * sinon 2TS. Défaut `true`. Non pertinent pour les intérêts.
+   */
+  eligibleAbattement40?: boolean;
 }
