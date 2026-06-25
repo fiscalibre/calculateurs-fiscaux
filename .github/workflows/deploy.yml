@@ -59,7 +59,14 @@ jobs:
             for path in dist/* dist/.htaccess; do
               [ -e "$path" ] || continue
               name=$(basename "$path")
-              if [ -d "$path" ]; then echo "put -r $name"; else echo "put $name"; fi
+              if [ -d "$path" ]; then
+                echo "put -r $name"
+              else
+                # rm d'abord : le SFTP OVH échoue à écraser un fichier existant
+                # (index.html par défaut, ou redéploiement). Le '-' ignore l'absence.
+                echo "-rm $name"
+                echo "put $name"
+              fi
             done
             echo "bye"
           } > sftp-batch
