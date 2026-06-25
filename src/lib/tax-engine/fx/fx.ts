@@ -15,7 +15,14 @@
 
 import donnees from "./ecb-rates.json";
 
-/** Forme du fichier de taux embarqué (cf. générateur). */
+/**
+ * Forme du fichier de taux embarqué (cf. scripts/fetch-ecb-rates.mjs).
+ *
+ * Format COLONNAIRE pour la compacité : au lieu d'un objet par jour (qui répète les
+ * clés devise des milliers de fois), on stocke `dates[]` (croissant) et une série
+ * numérique par devise, `taux[devise][i]` étant le cours du jour `dates[i]`
+ * (null = devise non cotée ce jour-là). ~5× plus léger que l'ancien format.
+ */
 interface DonneesTaux {
   readonly source: string;
   readonly url: string;
@@ -23,11 +30,18 @@ interface DonneesTaux {
   readonly dateMin: string;
   readonly dateMax: string;
   readonly devises: readonly string[];
-  /** date ISO (YYYY-MM-DD) → { DEVISE: "taux décimal en chaîne" }. */
-  readonly taux: Readonly<Record<string, Readonly<Record<string, string>>>>;
+  /** Dates ISO (YYYY-MM-DD) triées par ordre croissant. */
+  readonly dates: readonly string[];
+  /** DEVISE → série de taux alignée sur `dates` (null = non coté ce jour-là). */
+  readonly taux: Readonly<Record<string, readonly (number | null)[]>>;
 }
 
 const TAUX = donnees as DonneesTaux;
+
+/** Index date ISO → position dans `dates`, pour une résolution O(1) (avec repli). */
+const INDEX_PAR_DATE: ReadonlyMap<string, number> = new Map(
+  TAUX.dates.map((d, i) => [d, i]),
+);
 
 /** Devises couvertes par le fichier embarqué (hors EUR). */
 export const DEVISES_SUPPORTEES: readonly string[] = TAUX.devises;
@@ -71,7 +85,7 @@ function jourPrecedent(dateISO: string): string {
 }
 
 /**
- * Trouve la cotation BCE applicable à `dateISO`.
+ * Index dans `dates` de la cotation BCE applicable à `dateISO`.
  *
  * RÈGLE DE REPLI : la BCE ne publie pas les week-ends ni les jours fériés TARGET.
  * On retient donc le **dernier jour ouvré antérieur ou égal** à la date demandée
@@ -81,13 +95,13 @@ function jourPrecedent(dateISO: string): string {
  * @throws DateHorsHistoriqueError si on remonte avant `dateMin` sans rien trouver
  *         (ex. date strictement antérieure au début de l'historique).
  */
-function cotationApplicable(dateISO: string): Readonly<Record<string, string>> {
+function indexApplicable(dateISO: string): number {
   let courante = dateISO;
   // Filet de sécurité : un jour ouvré existe toujours à <= ~5 jours de recul,
   // mais on borne explicitement par dateMin pour ne pas boucler à l'infini.
   while (courante >= TAUX.dateMin) {
-    const cot = TAUX.taux[courante];
-    if (cot !== undefined) return cot;
+    const idx = INDEX_PAR_DATE.get(courante);
+    if (idx !== undefined) return idx;
     courante = jourPrecedent(courante);
   }
   throw new DateHorsHistoriqueError(dateISO);
@@ -124,20 +138,19 @@ export function convertirEnEuros(
   // EUR → EUR : montant inchangé, pas de conversion.
   if (devise === "EUR") return montantDeviseCents;
 
+  // Devise hors périmètre : on tranche avant de chercher une date.
+  const serie = TAUX.taux[devise];
+  if (serie === undefined) throw new DeviseInconnueError(devise);
+
   if (dateISO > TAUX.dateMax) throw new DateHorsHistoriqueError(dateISO);
 
-  const cotation = cotationApplicable(dateISO);
-  const tauxStr = cotation[devise];
-  if (tauxStr === undefined) {
-    // Devise non gérée du tout, ou non cotée ce jour-là.
-    if (!DEVISES_SUPPORTEES.includes(devise)) throw new DeviseInconnueError(devise);
-    throw new DateHorsHistoriqueError(dateISO);
-  }
+  const taux = serie[indexApplicable(dateISO)];
+  // Devise non cotée ce jour-là (rare pour les majors) : pas de cours exploitable.
+  if (taux === null || taux === undefined) throw new DateHorsHistoriqueError(dateISO);
 
   // Cotation BCE : 1 EUR = `taux` unités de devise → EUR = devise / taux.
   // Les centimes de devise et d'euro partageant le même facteur 100, on divise
   // directement les centimes par le taux, puis on arrondit au centime entier.
-  const taux = Number(tauxStr);
   const centsEur = montantDeviseCents / taux;
   return Math.round(centsEur);
 }
