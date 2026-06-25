@@ -191,6 +191,7 @@ export default function Calculateur() {
             suppressionImpossible={lignes.length === 1}
             onChange={modifierLigne}
             onSupprimer={supprimerLigne}
+            erreurs={conversions[i]!.erreurs}
           />
         ))}
       </section>

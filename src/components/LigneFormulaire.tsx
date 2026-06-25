@@ -14,6 +14,8 @@ interface LigneFormulaireProps {
   readonly suppressionImpossible: boolean;
   readonly onChange: (id: string, champs: Partial<LigneSaisie>) => void;
   readonly onSupprimer: (id: string) => void;
+  /** Erreurs de validation/conversion de la ligne (affichées dès qu'un montant est saisi). */
+  readonly erreurs: readonly string[];
 }
 
 const classeChamp =
@@ -25,9 +27,12 @@ export default function LigneFormulaire({
   suppressionImpossible,
   onChange,
   onSupprimer,
+  erreurs,
 }: LigneFormulaireProps) {
-  const montantNegatif = ligne.montant.trim() !== "" && Number(ligne.montant.replace(/\s/g, "").replace(",", ".")) < 0;
-  const afficheInfoBce = devisErangere(ligne.devise);
+  const montantRenseigne = ligne.montant.trim() !== "";
+  // La devise étrangère déclenche la conversion BCE : la date d'encaissement
+  // devient nécessaire et le champ n'a aucun sens en EUR (cours = 1).
+  const deviseEtrangere = devisErangere(ligne.devise);
 
   return (
     <fieldset className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
@@ -67,17 +72,22 @@ export default function LigneFormulaire({
           </select>
         </label>
 
-        {/* Date d'encaissement */}
-        <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-          Date d'encaissement
-          <input
-            type="date"
-            className={classeChamp}
-            autoComplete="off"
-            value={ligne.dateEncaissement}
-            onChange={(e) => onChange(ligne.id, { dateEncaissement: e.target.value })}
-          />
-        </label>
+        {/* Date d'encaissement — uniquement pour une devise étrangère (sert au cours BCE). */}
+        {deviseEtrangere && (
+          <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
+            Date d'encaissement
+            <input
+              type="date"
+              className={classeChamp}
+              autoComplete="off"
+              value={ligne.dateEncaissement}
+              onChange={(e) => onChange(ligne.id, { dateEncaissement: e.target.value })}
+            />
+            <span className="mt-0.5 text-xs font-normal text-slate-400">
+              requise pour la conversion
+            </span>
+          </label>
+        )}
 
         {/* Montant + bascule brut/net */}
         <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
@@ -134,7 +144,7 @@ export default function LigneFormulaire({
               </option>
             ))}
           </select>
-          {afficheInfoBce && (
+          {deviseEtrangere && (
             <span className="mt-0.5 inline-flex w-fit items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
               converti en EUR au cours BCE du jour d'encaissement
             </span>
@@ -172,11 +182,14 @@ export default function LigneFormulaire({
         )}
       </div>
 
-      <div className="mt-3 flex items-center justify-between">
-        {montantNegatif ? (
-          <p className="text-xs font-medium text-red-600">
-            Les montants doivent être positifs ou nuls.
-          </p>
+      <div className="mt-3 flex items-start justify-between gap-3">
+        {/* Erreurs de validation/conversion, une fois un montant saisi (sinon ligne en cours). */}
+        {montantRenseigne && erreurs.length > 0 ? (
+          <ul className="list-inside list-disc text-xs font-medium text-red-600">
+            {erreurs.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
+          </ul>
         ) : (
           <span />
         )}
