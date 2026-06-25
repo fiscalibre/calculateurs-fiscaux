@@ -21,19 +21,21 @@ page (via `Astro.url.pathname` → cohérent avec l'URL servie), URLs `og:image`
 
 Le workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) build
 puis pousse `dist/` vers le dossier `www/` de l'hébergement à chaque push sur
-`main`.
+`main`, via **`lftp mirror` en SFTP** (`mirror -R --delete`, inclut les dotfiles
+comme `.htaccess`, exclut `.well-known/`).
 
 **Secrets à définir** (Settings → Secrets and variables → Actions) :
 
 | Secret | Valeur |
 | --- | --- |
-| `FTP_SERVER` | hôte FTP OVH (ex. `ftp.clusterXXX.hosting.ovh.net`) |
-| `FTP_USER` | identifiant FTP OVH |
-| `FTP_PASSWORD` | mot de passe FTP OVH |
+| `FTP_SERVER` | hôte OVH (ex. `ftp.clusterXXX.hosting.ovh.net`) |
+| `FTP_USER` | identifiant OVH |
+| `FTP_PASSWORD` | mot de passe OVH |
 
-> Connexion en **FTPS explicite** (port 21 + TLS) → les identifiants ne
-> transitent jamais en clair. Pensez à changer le mot de passe FTP par défaut
-> dans l'espace client OVH.
+> ⚠️ L'offre gratuite OVH **n'expose pas FTPS** (port 21 en clair seulement),
+> mais **fournit le SFTP sur le port 22** (transfert chiffré via SSH, sans shell
+> interactif). On déploie donc en **SFTP** — identifiants et fichiers chiffrés.
+> Pensez à changer le mot de passe par défaut dans l'espace client OVH.
 
 ## 3. Domaine, HTTPS, redirection
 
