@@ -5,8 +5,8 @@ const title =
   "Case 8PL et 8VL 2026 : que mettre, et l'erreur « ligne 8VL sans code 8PL »";
 const description =
   "Déclaration 2026 : à quoi servent les cases 8VL et 8PL du formulaire 2047, que faut-il y inscrire, et comment corriger l'erreur « ligne 8VL sans code 8PL » sur impots.gouv.fr. Explication claire, sans jargon.";
-const canonical = "https://example.com/case-8pl-8vl-2026";
-const ogImage = "/og-default.png";
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL("/og-default.png", Astro.site).href;
 const noticeUrl =
   "https://www.impots.gouv.fr/sites/default/files/formulaires/2047/2026/2047_5490.pdf";
 ---

@@ -7,8 +7,8 @@ const title =
   "Calculateur gratuit du crédit d'impôt sur dividendes étrangers (2047, 8VL, 8PL)";
 const description =
   "Calculez gratuitement votre crédit d'impôt sur dividendes et intérêts étrangers : cases 2047 (205/207), 8VL et 8PL 2026. Calcul 100 % local dans votre navigateur, open source, sans compte ni tracker.";
-const canonical = "https://example.com/";
-const ogImage = "/og-default.png";
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL("/og-default.png", Astro.site).href;
 ---
 
 <!doctype html>

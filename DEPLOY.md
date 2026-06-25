@@ -20,15 +20,22 @@ statique ; ci-dessous la configuration Cloudflare Pages.
 Sur Pages : **Workers & Pages → Create application → Pages → Connect to Git**,
 sélectionnez le dépôt, puis renseignez la commande et le répertoire ci-dessus.
 
-## 2. Placeholders à renseigner
+## 2. Domaine de production
 
-Chaque page définit une URL `canonical` en `https://example.com/…` — à remplacer par le domaine de production :
+Le domaine est **centralisé** dans `astro.config.mjs` :
 
-| Emplacement | Placeholder (`canonical`) |
-| --- | --- |
-| `src/pages/index.astro` | `https://example.com/` |
-| `src/pages/case-8pl-8vl-2026.astro` | `https://example.com/case-8pl-8vl-2026` |
-| `src/pages/guide-credit-impot-dividendes-etrangers.astro` | `https://example.com/guide-credit-impot-dividendes-etrangers` |
+```js
+site: 'https://clairfisc.fr',
+```
+
+Tout en dérive automatiquement au build, **un seul endroit à changer** :
+- le `canonical` de chaque page (dérivé de `Astro.url.pathname` → toujours cohérent avec l'URL servie) ;
+- l'URL `og:image` et `og:url` (absolues) ;
+- le `sitemap-index.xml` / `sitemap-0.xml` (générés par `@astrojs/sitemap`).
+
+`public/robots.txt` référence `https://clairfisc.fr/sitemap-index.xml` (à aligner si le domaine change). `public/og-default.png` (1200×630) est l'image de partage par défaut.
+
+> Tant que le DNS de `clairfisc.fr` n'est pas pointé sur Cloudflare, le site reste accessible sur le sous-domaine `*.pages.dev` ; les `canonical` pointeront déjà vers `clairfisc.fr` (sans incidence tant que le domaine n'est pas en ligne).
 
 ## 3. Tester le build en local
 

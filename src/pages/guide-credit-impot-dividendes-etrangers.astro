@@ -5,8 +5,8 @@ const title =
   "Crédit d'impôt sur dividendes étrangers : guide des cases 2047, 8VL et 8PL (2026)";
 const description =
   "Comment fonctionne le crédit d'impôt sur les dividendes et intérêts étrangers ? Explication simple des cases 203 à 207 du formulaire 2047, de la case 8VL et de la nouvelle case 8PL 2026, sans jargon.";
-const canonical = "https://example.com/guide-credit-impot-dividendes-etrangers";
-const ogImage = "/og-default.png";
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL("/og-default.png", Astro.site).href;
 ---
 
 <!doctype html>
